@@ -4,14 +4,17 @@
 #include "SquareObject.hpp"
 #include "Bomb.hpp"
 #include <vector>
+#include <unordered_map>
 
 class Bomb;     // Forward declaration
 
 class Player : public SquareObject{
     public:
     // Constructor
-    Player();
+    Player(int id_);
     Player(int ix, int iy);
+
+    static Player* find(int id_);
     
     // Destructor
     ~Player();
@@ -19,8 +22,11 @@ class Player : public SquareObject{
     enum class Direction{UP, DOWN, RIGHT, LEFT, NONE};
 
     void moveTo(Player::Direction direction);
-
+    void moveTo(int x_, int y_);
+    
     void createBomb();
+
+    int kills;
 
     private:
     req_delete_t run() override;
@@ -32,6 +38,8 @@ class Player : public SquareObject{
 
     enum class StateIs{Living, Dying, Died} state;
     timespec state_transition_time;
+
+    static std::unordered_map<int, Player*> id_Player;
 };
 
 

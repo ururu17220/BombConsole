@@ -2,11 +2,21 @@
 #include "SquareObject.hpp"
 #include <time.h>
 
-Player::Player(){}
+Player::Player(int id_){
+    id_Player[id_] = this;
+    creatable_num = 4;
+    kills = 0;
+    state = StateIs::Living;
+}
 
 Player::Player(int ix, int iy) : SquareObject(ix, iy){
     creatable_num = 4;
+    kills = 0;
     state = StateIs::Living;
+}
+
+Player* Player::find(int id_){
+    return id_Player[id_];
 }
 
 SquareObject::req_delete_t Player::run(){
@@ -68,6 +78,11 @@ void Player::moveTo(Player::Direction direction){
         x = dest_x;
         y = dest_y;
     }
+}
+
+void Player::moveTo(int x_, int y_){
+    x = x_;
+    y = y_;
 }
 
 void Player::createBomb(){
