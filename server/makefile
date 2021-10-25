@@ -1,7 +1,7 @@
 all: a.out
 CPPFLAGS :=-O3 -std=c++11 -Wall
 LDFLAGS :=-lncursesw -lpthread
-SRCS := test.cpp SquareObject.cpp Block.cpp Player.cpp Bomb.cpp Fire.cpp
+SRCS := server.cpp SquareObject.cpp Block.cpp Player.cpp Bomb.cpp Fire.cpp ServerClient.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 DEPS := $(SRCS:%.cpp=%.d)
 
