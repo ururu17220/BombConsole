@@ -28,6 +28,7 @@ SquareObject::req_delete_t Player::run(){
             state = StateIs::Dying;
             state_transition_time.tv_sec = current_time.tv_sec + 1;
             state_transition_time.tv_nsec = current_time.tv_nsec;
+            death.push_back(this);
         }
         else
             setSquareMapAttr(x, y, PLAYER_LIVING_ATTR);

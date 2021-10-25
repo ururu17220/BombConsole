@@ -27,7 +27,8 @@ class Player : public SquareObject{
     void createBomb();
 
     int kills;
-
+    static std::vector<Player*> death;
+    
     private:
     req_delete_t run() override;
     void drawAA() override;
