@@ -90,3 +90,10 @@ Server::~Server(){
     }
     close(s);
 }
+
+void Server::broadcast(uint8_t *send_data, int len){
+    for(auto itr = clients.begin(); itr != clients.end(); itr++){
+        Client *c = itr->second;
+        c->send(send_data, len);
+    }
+}

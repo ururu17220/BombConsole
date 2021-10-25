@@ -51,6 +51,9 @@ class Server{
 
     Client* waitClients();
 
+
+    void broadcast(uint8_t *send_data, int len);
+
     std::unordered_map<int, Client*> clients;
 
     private:
