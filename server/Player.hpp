@@ -15,6 +15,7 @@ class Player : public SquareObject{
     Player(int ix, int iy);
 
     static Player* find(int id_);
+    char name[64];
     
     // Destructor
     ~Player();
