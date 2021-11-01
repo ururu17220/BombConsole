@@ -2,8 +2,8 @@
 
 #define __SQUARE_OBJECT_HPP__
 
-#define MAP_SIZE_X      7
-#define MAP_SIZE_Y      7
+#define MAP_SIZE_X      5
+#define MAP_SIZE_Y      5
 #define MAP_SQ_SIZE_X   3
 #include <list>
 #include <ncurses.h>
