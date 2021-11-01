@@ -18,8 +18,10 @@
 std::mutex mtx;
 
 std::list<SquareObject*> SquareObject::object_list;
-uint8_t SquareObject::square_map[MAP_SIZE_X][MAP_SIZE_Y] = {0};
-uint8_t SquareObject::square_map_p[MAP_SIZE_X][MAP_SIZE_Y] = {0};
+std::vector<std::vector<uint8_t>> SquareObject::square_map;
+std::vector<std::vector<uint8_t>> SquareObject::square_map_p;
+int SquareObject::MAP_SIZE_X;
+int SquareObject::MAP_SIZE_Y;
 timespec SquareObject::current_time;
 std::unordered_map<int, Player*> Player::id_Player;
 std::vector<Player*> Player::death;
@@ -39,10 +41,12 @@ void gamemaster(int key){
 
 void make_map(){
     int i,j;
-    for(i = 0; i < MAP_SIZE_X; i++)
-        for(j = 0; j < MAP_SIZE_Y; j++)
+    int map_size_x, map_size_y;
+    SquareObject::getMapSize(&map_size_x, &map_size_y);
+    for(i = 0; i < map_size_x; i++)
+        for(j = 0; j < map_size_y; j++)
             if(
-                (i == 0 || j == 0 || i == MAP_SIZE_X-1 || j == MAP_SIZE_Y-1)
+                (i == 0 || j == 0 || i == map_size_x-1 || j == map_size_y-1)
                 ||
                 (i%2 + j%2 == 0)
             )
@@ -61,7 +65,9 @@ int main(void){
 
     start_color();
     color_init();
+    
     // test
+    SquareObject::setMapSize(7, 7);
     make_map();
 
     gm = new Player(3, 5);
@@ -80,19 +86,23 @@ int main(void){
 
     // wait client
     server.waitClients();
-    uint8_t send_data[MAP_SIZE_X*MAP_SIZE_Y + 1];   // Map data and Player's death or living
+    int map_size_x, map_size_y;
+    SquareObject::getMapSize(&map_size_x, &map_size_y);
+    std::vector<uint8_t> send_data(map_size_y * map_size_x + 1);   // Map data and Player's death or living
 
     while(1){
         clear();
         mtx.lock();
-        SquareObject::runAllObjects(send_data+1);
+        auto itr = send_data.begin();
+        itr += 1;
+        SquareObject::runAllObjects(itr);
 
         // send data 
         for(auto itr = server.clients.begin(); itr != server.clients.end(); itr++){ 
             Client *c = itr->second;
             Player *p = Player::find(c->getSocket());
             send_data[0] = p->getState();
-            c->send(send_data, sizeof(send_data) / sizeof(send_data[0]));
+            c->send(send_data.data(), (int)send_data.size());
         }
 
         mtx.unlock();

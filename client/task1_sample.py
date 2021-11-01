@@ -23,16 +23,21 @@ s.connect((SERVER_IP, PORT))
 # 自分の名前（ログインしているユーザー名）を送信する
 s.send(user_name_bytes)
 
-# サーバーからデータ(2byte)を受信
-receive_data = s.recv(2)
+# サーバーからデータ(4byte)を受信
+receive_data = s.recv(4)
 
 # 受信データの配列から初期位置をとりだす
 # 1番目がx座標、2番目がy座標
 x = receive_data[0]
 y = receive_data[1]
+# 3番目がマップサイズ（x）、4番目がマップサイズ（y）
+map_size_x = receive_data[2]
+map_size_y = receive_data[3]
 
 # 座標の表示
 print("x = %d, y = %d\n" %(x, y))
+# マップサイズの表示
+print("mapsize %d * %d\n" %(map_size_x, map_size_y))
 
 # --------------------------------------------------------
 

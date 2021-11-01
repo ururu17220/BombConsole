@@ -19,6 +19,18 @@ SquareObject::~SquareObject(){
 
 }
 
+void SquareObject::setMapSize(int map_size_x, int map_size_y){
+    square_map = std::vector<std::vector<uint8_t>>(map_size_x, std::vector<uint8_t>(map_size_y));
+    square_map_p = std::vector<std::vector<uint8_t>>(map_size_x, std::vector<uint8_t>(map_size_y));
+    MAP_SIZE_X = map_size_x;
+    MAP_SIZE_Y = map_size_y;
+}
+
+void SquareObject::getMapSize(int *map_size_x, int *map_size_y){
+    *map_size_x = MAP_SIZE_X;
+    *map_size_y = MAP_SIZE_Y;
+}
+
 void SquareObject::runAllObjects(){
     clock_gettime(CLOCK_MONOTONIC_RAW, &current_time);
     for(int i = 0; i < MAP_SIZE_X; i++){
@@ -42,13 +54,11 @@ void SquareObject::runAllObjects(){
 
 }
 
-void SquareObject::runAllObjects(uint8_t *square_map_cylinder){
+void SquareObject::runAllObjects(std::vector<uint8_t>::iterator &square_map_cylinder){
     runAllObjects();
-    if(square_map_cylinder = nullptr)
-        return;
     for(int j = 0; j < MAP_SIZE_Y; j++)
         for(int i = 0; i < MAP_SIZE_X; i++)
-            square_map_cylinder[j*MAP_SIZE_Y+i] = square_map[i][j]; 
+            *(square_map_cylinder++) = square_map[i][j]; 
 }
 
 void SquareObject::print(const char *aa){

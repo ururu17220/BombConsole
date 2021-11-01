@@ -2,10 +2,9 @@
 
 #define __SQUARE_OBJECT_HPP__
 
-#define MAP_SIZE_X      5
-#define MAP_SIZE_Y      5
 #define MAP_SQ_SIZE_X   3
 #include <list>
+#include <vector>
 #include <ncurses.h>
 #include <locale.h>
 #include <time.h>
@@ -19,11 +18,17 @@ class SquareObject{
     // Destructor
     virtual ~SquareObject();
 
+    static void setMapSize(int map_size_x, int map_size_y);
+    static void getMapSize(int *map_size_x, int *map_size_y);
+
     // Execute every time
     static void runAllObjects();
-    static void runAllObjects(uint8_t *square_map_cylinder);
+    static void runAllObjects(std::vector<uint8_t>::iterator &square_map_cylinder);
 
     protected:
+    static int MAP_SIZE_X;
+    static int MAP_SIZE_Y;
+
     // Coordinate
     int x, y;
 
@@ -47,10 +52,10 @@ class SquareObject{
 
     private:
     // Next map
-    static uint8_t square_map[MAP_SIZE_X][MAP_SIZE_Y];
+    static std::vector<std::vector<uint8_t>> square_map;
 
     // Previous map
-    static uint8_t square_map_p[MAP_SIZE_X][MAP_SIZE_Y];
+    static std::vector<std::vector<uint8_t>> square_map_p;
 
     // Object list 
     static std::list<SquareObject*> object_list;

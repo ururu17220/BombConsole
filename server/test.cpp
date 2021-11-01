@@ -11,9 +11,13 @@
 #include "color_def.h"
 
 std::list<SquareObject*> SquareObject::object_list;
-uint8_t SquareObject::square_map[MAP_SIZE_X][MAP_SIZE_Y] = {0};
-uint8_t SquareObject::square_map_p[MAP_SIZE_X][MAP_SIZE_Y] = {0};
+std::vector<std::vector<uint8_t>> SquareObject::square_map;
+std::vector<std::vector<uint8_t>> SquareObject::square_map_p;
+int SquareObject::MAP_SIZE_X;
+int SquareObject::MAP_SIZE_Y;
 timespec SquareObject::current_time;
+std::unordered_map<int, Player*> Player::id_Player;
+std::vector<Player*> Player::death;
 
 Player *gm;
 void gamemaster(int key){
@@ -29,10 +33,12 @@ void gamemaster(int key){
 
 void make_map(){
     int i,j;
-    for(i = 0; i < MAP_SIZE_X; i++)
-        for(j = 0; j < MAP_SIZE_Y; j++)
+    int map_size_x, map_size_y;
+    SquareObject::getMapSize(&map_size_x, &map_size_y);
+    for(i = 0; i < map_size_x; i++)
+        for(j = 0; j < map_size_y; j++)
             if(
-                (i == 0 || j == 0 || i == MAP_SIZE_X-1 || j == MAP_SIZE_Y-1)
+                (i == 0 || j == 0 || i == map_size_x-1 || j == map_size_y-1)
                 ||
                 (i%2 + j%2 == 0)
             )
@@ -51,10 +57,13 @@ int main(void){
 
     start_color();
     color_init();
+
+    SquareObject::setMapSize(15, 15);
+
     // test
     make_map();
 
-    gm = new Player(3, 5);
+    gm = new Player(3, 3);
 
     while(1){
         clear();
