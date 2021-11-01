@@ -90,3 +90,7 @@ void Player::createBomb(){
     if(state == StateIs::Living && !(getSquareMapAttr(x, y) & (BOMB_ATTR | BLOCK_ATTR)))
         created_bombs.push_back(new Bomb(this, x, y, 4));
 }
+
+uint8_t Player::getState(){
+    return (uint8_t)state;
+}

@@ -19,7 +19,7 @@ SquareObject::~SquareObject(){
 
 }
 
-void SquareObject::runAllObjects(){
+void SquareObject::runAllObjects(uint8_t *square_map_cylinder = nullptr){
     clock_gettime(CLOCK_MONOTONIC_RAW, &current_time);
     for(int i = 0; i < MAP_SIZE_X; i++){
         for(int j = 0; j < MAP_SIZE_Y; j++){
@@ -39,6 +39,10 @@ void SquareObject::runAllObjects(){
         else
             sqobj->drawAA();
     }
+    
+    for(int j = 0; j < MAP_SIZE_Y; j++)
+        for(int i = 0; i < MAP_SIZE_X; i++)
+            square_map_cylinder[j*MAP_SIZE_Y+i] = square_map[i][j]; 
 }
 
 void SquareObject::print(const char *aa){

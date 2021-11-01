@@ -2,8 +2,8 @@
 
 #define __SQUARE_OBJECT_HPP__
 
-#define MAP_SIZE_X      17
-#define MAP_SIZE_Y      17
+#define MAP_SIZE_X      7
+#define MAP_SIZE_Y      7
 #define MAP_SQ_SIZE_X   3
 #include <list>
 #include <ncurses.h>
@@ -20,7 +20,7 @@ class SquareObject{
     virtual ~SquareObject();
 
     // Execute every time
-    static void runAllObjects();
+    static void runAllObjects(uint8_t *square_map_cylinder);
 
     protected:
     // Coordinate

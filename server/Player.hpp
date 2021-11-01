@@ -16,7 +16,7 @@ class Player : public SquareObject{
 
     static Player* find(int id_);
     char name[64];
-    
+
     // Destructor
     ~Player();
 
@@ -26,6 +26,8 @@ class Player : public SquareObject{
     void moveTo(int x_, int y_);
     
     void createBomb();
+
+    uint8_t getState();
 
     int kills;
     static std::vector<Player*> death;
@@ -38,7 +40,7 @@ class Player : public SquareObject{
     int creatable_num;
     std::vector<Bomb*> created_bombs;
 
-    enum class StateIs{Living, Dying, Died} state;
+    enum class StateIs : uint8_t{Living, Dying, Died} state;
     timespec state_transition_time;
 
     static std::unordered_map<int, Player*> id_Player;
