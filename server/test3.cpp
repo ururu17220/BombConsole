@@ -25,6 +25,7 @@ int SquareObject::MAP_SIZE_Y;
 timespec SquareObject::current_time;
 std::unordered_map<int, Player*> Player::id_Player;
 std::vector<Player*> Player::death;
+std::unordered_set<Player*> Player::living;
 
 
 Player *gm;

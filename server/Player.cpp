@@ -4,6 +4,7 @@
 
 Player::Player(int id_){
     id_Player[id_] = this;
+    living.insert(this);
     creatable_num = 4;
     kills = 0;
     state = StateIs::Living;
@@ -29,6 +30,7 @@ SquareObject::req_delete_t Player::run(){
             state_transition_time.tv_sec = current_time.tv_sec + 1;
             state_transition_time.tv_nsec = current_time.tv_nsec;
             death.push_back(this);
+            living.erase(this);
         }
         else
             setSquareMapAttr(x, y, PLAYER_LIVING_ATTR);

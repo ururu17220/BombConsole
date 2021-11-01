@@ -5,6 +5,7 @@
 #include "Bomb.hpp"
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class Bomb;     // Forward declaration
 
@@ -31,6 +32,7 @@ class Player : public SquareObject{
 
     int kills;
     static std::vector<Player*> death;
+    static std::unordered_set<Player*> living;
     
     private:
     req_delete_t run() override;
