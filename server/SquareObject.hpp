@@ -20,6 +20,7 @@ class SquareObject{
     virtual ~SquareObject();
 
     // Execute every time
+    static void runAllObjects();
     static void runAllObjects(uint8_t *square_map_cylinder);
 
     protected:
