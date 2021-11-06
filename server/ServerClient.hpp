@@ -15,14 +15,15 @@ class Client{
 
     // Destructor
     ~Client();
+
     int send(const uint8_t *send_data, int len);
-    void (*onReceive)(Client *c, uint8_t *receive_data, int len);
+    void (**onReceive)(Client *c, uint8_t *receive_data, int len);
 
     int getSocket();
 
     private:
     // Constructor
-    Client(int ss_, void (*onReceive_)(Client *c, uint8_t *receive_data, int len));
+    Client(int ss_, void (**onReceive_)(Client *c, uint8_t *receive_data, int len));
 
     // socket
     int ss;

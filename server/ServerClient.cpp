@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <time.h>
 
-Client::Client(int ss_, void (*onReceive_)(Client *c, uint8_t *receive_data, int len)):
+Client::Client(int ss_, void (**onReceive_)(Client *c, uint8_t *receive_data, int len)):
     ss(ss_),
     onReceive(onReceive_),
     isEnd(false)
@@ -30,7 +30,7 @@ void Client::task(){
     while(!isEnd){
         int len = read(ss, buf, sizeof(buf) / sizeof(buf[0]));
         if(len > 0){
-            onReceive(this, buf, len);
+            (*onReceive)(this, buf, len);
         }
     }
 }
@@ -77,7 +77,7 @@ Client* Server::waitClients(){
         exit(1);
     }
 
-    Client *c = new Client(ss, onReceive);
+    Client *c = new Client(ss, &onReceive);
     onConnect(c);
     clients[ss] = c;
     return c;
