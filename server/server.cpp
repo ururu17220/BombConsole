@@ -54,9 +54,9 @@ int main(void){
     start_color();
     color_init();
 
+    // Server initialize
     Server server(PORT);    
 
-    // waiting Players
     server.onConnect = [](Client *c){
         new Player(c->getSocket());
     };
@@ -67,6 +67,7 @@ int main(void){
         printw("%s\n", receive_data);
     };
 
+    // wait clients
     bool waitend = false;
     std::thread waitingPlayers([&waitend, &server](){
         while(!waitend)
@@ -87,12 +88,12 @@ int main(void){
 
 
     // make map
-    int map_size = ceil(server.clients.size()/4) + 3;
+    int map_size = ceil((double)server.clients.size()/4.0)*4 + 3;
     SquareObject::setMapSize(map_size, map_size);
     make_map();
 
 
-    // send coordinate
+    // send initial coordinate
     uint8_t send_data_coordinate[4];
     uint8_t x_init = 1;
     uint8_t y_init = 1;
@@ -101,17 +102,18 @@ int main(void){
     for(auto itr = server.clients.begin(); itr != server.clients.end(); itr++){
         send_data_coordinate[0] = x_init;
         send_data_coordinate[1] = y_init;
+        Player::find(itr->second->getSocket())->moveTo(x_init, y_init);
+        itr->second->send(send_data_coordinate, sizeof(send_data_coordinate)/sizeof(send_data_coordinate[0]));
         x_init += 4;
         if(x_init >= map_size){
             x_init = 1;
             y_init += 4;
         }
-        Player::find(itr->second->getSocket())->moveTo(x_init, y_init);
-        itr->second->send(send_data_coordinate, sizeof(send_data_coordinate)/sizeof(send_data_coordinate[0]));
     }
 
 
     // game start
+    mtx.lock();
     server.onConnect = [](Client *c){
         // ignore
     };
@@ -124,16 +126,20 @@ int main(void){
         if(bomb)
             p->createBomb();
     };
+    mtx.unlock();
 
+
+    std::vector<uint8_t> send_data(map_size * map_size + 1);   // Map data and Player's death or living
 
     // game loop
-    std::vector<uint8_t> send_data(map_size * map_size + 1);   // Map data and Player's death or living
     while(Player::living.size() > 1){
         clear();
+
         mtx.lock();
-        auto itr = send_data.begin();
-        itr += 1;
-        SquareObject::runAllObjects(itr);
+        auto send_data_itr = send_data.begin();
+        send_data_itr += 1;
+        SquareObject::runAllObjects(send_data_itr);
+        mtx.unlock();
 
         // send data 
         for(auto itr = server.clients.begin(); itr != server.clients.end(); itr++){ 
@@ -142,12 +148,16 @@ int main(void){
             send_data[0] = p->getState();
             c->send(send_data.data(), send_data.size());
         }
-        mtx.unlock();
+
         refresh();
+        int key = getch();
+        if(key=='q')break;  // Force end
     }
-    
 
     // game end
+    uint8_t game_end_command = (uint8_t)'\n';
+    server.broadcast(&game_end_command, 1);
+
     if(Player::living.size() == 1)
         Player::death.push_back(*Player::living.begin());
 
@@ -161,11 +171,14 @@ int main(void){
         ranking += p->name;
         ranking += '\n';
     }
-    server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
 
+    server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
+    
+    waitingPlayers.detach();
 
     endwin();
-    waitingPlayers.detach();
+
+    printf("RANKING\n%s\n", ranking.c_str());
 
     return 0;
 }
