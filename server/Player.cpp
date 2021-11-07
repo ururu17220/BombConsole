@@ -50,7 +50,7 @@ SquareObject::req_delete_t Player::run(){
 void Player::drawAA(){
     switch (state){
     case StateIs::Living:
-        print("自");
+        print("人");
         break;
     case StateIs::Dying:
         print("死");
