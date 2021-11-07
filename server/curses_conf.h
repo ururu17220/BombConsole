@@ -1,6 +1,10 @@
 #ifndef __COLOR_DEF_H__
 #define __COLOR_DEF_H__
+#include <cstdint>
 
+//#define NO_CURSES
+
+#ifndef NO_CURSES
 #include <ncurses.h>
 
 #define BLOCK_COLOR         1
@@ -18,6 +22,6 @@ inline void color_init(){
     init_pair(PLAYER_LIVING_COLOR, COLOR_WHITE, COLOR_BLACK);
     init_pair(PLAYER_DYING_COLOR, COLOR_MAGENTA, COLOR_BLUE);
 }
-
+#endif
 
 #endif

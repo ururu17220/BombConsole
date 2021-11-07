@@ -1,6 +1,10 @@
 #include "SquareObject.hpp"
+#include "curses_conf.h"
+#ifndef NO_CURSES
 #include <ncurses.h>
 #include <locale.h>
+#endif
+
 #include <time.h>
 
 SquareObject::SquareObject()
@@ -48,8 +52,10 @@ void SquareObject::runAllObjects(){
             --itr;
             delete sqobj;
         }
+        #ifndef NO_CURSES
         else
             sqobj->drawAA();
+        #endif
     }
 
 }
@@ -62,7 +68,9 @@ void SquareObject::runAllObjects(std::vector<uint8_t>::iterator &square_map_cyli
 }
 
 void SquareObject::print(const char *aa){
+    #ifndef NO_CURSES
     mvprintw(y, x*MAP_SQ_SIZE_X, aa);
+    #endif
 }
 
 uint8_t SquareObject::setSquareMapAttr(int map_x, int map_y, uint8_t map_attr){

@@ -11,7 +11,7 @@
 #include "SquareObject.hpp"
 #include "Block.hpp"
 #include "Player.hpp"
-#include "color_def.h"
+#include "curses_conf.h"
 
 #define PORT    8000
 

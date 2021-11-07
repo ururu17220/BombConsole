@@ -5,8 +5,12 @@
 #define MAP_SQ_SIZE_X   3
 #include <list>
 #include <vector>
+
+#include "curses_conf.h"
+#ifndef NO_CURSES
 #include <ncurses.h>
 #include <locale.h>
+#endif
 #include <time.h>
 
 class SquareObject{
@@ -68,6 +72,6 @@ const uint8_t PLAYER_ATTR           = PLAYER_DYING_ATTR + PLAYER_LIVING_ATTR;
 const uint8_t BLOCK_ATTR            = 0x20;
 const uint8_t BOMB_ATTR             = 0x10;
 const uint8_t FIRE_ATTR             = 0x08;
-
+const uint8_t THREAT_ATTR           = 0x04;
 
 #endif

@@ -1,18 +1,51 @@
-#include <ncurses.h>
-#include <locale.h>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <unistd.h>
 #include <string.h>
 #include <string>
+#include <stdio.h>
+#include <stdarg.h>
 #include <math.h>
 
 #include "ServerClient.hpp"
 #include "SquareObject.hpp"
 #include "Block.hpp"
 #include "Player.hpp"
-#include "color_def.h"
+
+#include "curses_conf.h"
+#ifndef NO_CURSES
+#include <ncurses.h>
+#include <locale.h>
+#else
+#include <termios.h>
+#include <fcntl.h>
+
+template <typename ... Args>
+void printw(const char *format, Args const & ... args){
+    printf(format, args ...);
+}
+
+int getch(void){
+    usleep(100000);
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+    if(ch != EOF){
+        return ch;
+    }
+    return 0;
+}
+
+#endif
 
 #define PORT    8000
 
@@ -43,6 +76,7 @@ void make_map(){
 }
 
 int main(void){
+    #ifndef NO_CURSES
     // ncurses initialize
     setlocale(LC_ALL, "");
     initscr();
@@ -53,6 +87,7 @@ int main(void){
     curs_set(0);
     start_color();
     color_init();
+    #endif 
 
     // Server initialize
     Server server(PORT);    
@@ -68,6 +103,8 @@ int main(void){
     };
 
     // wait clients
+    printw("waiting players...\n");
+    printw("Press 'g' : Game Start ,  Press 'q' : Force End\n\n");
     bool waitend = false;
     std::thread waitingPlayers([&waitend, &server](){
         while(!waitend)
@@ -76,13 +113,13 @@ int main(void){
 
     while(1){
         int key = getch();
-        if(key == 'g' && server.clients.size() != 0)
+        if(key == 'g' && server.clients.size() > 1)
             break;
         else if(key == 'q'){
-            endwin();
             waitingPlayers.detach();
             return 0;
         }
+
     }
     waitend = true;
 
@@ -113,6 +150,7 @@ int main(void){
 
 
     // game start
+    printw("\nGame Start!\n");
     mtx.lock();
     server.onConnect = [](Client *c){
         // ignore
@@ -133,7 +171,9 @@ int main(void){
 
     // game loop
     while(Player::living.size() > 1){
+        #ifndef NO_CURSES
         clear();
+        #endif 
 
         mtx.lock();
         auto send_data_itr = send_data.begin();
@@ -148,13 +188,16 @@ int main(void){
             send_data[0] = p->getState();
             c->send(send_data.data(), send_data.size());
         }
-
+        #ifndef NO_CURSES
         refresh();
+        #endif
         int key = getch();
         if(key=='q')break;  // Force end
     }
 
     // game end
+    printw("Game End!\n\n");
+    sleep(1);
     uint8_t game_end_command = (uint8_t)'\n';
     server.broadcast(&game_end_command, 1);
 
@@ -173,10 +216,12 @@ int main(void){
     }
 
     server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
-    
+
     waitingPlayers.detach();
 
+    #ifndef NO_CURSES
     endwin();
+    #endif 
 
     printf("RANKING\n%s\n", ranking.c_str());
 

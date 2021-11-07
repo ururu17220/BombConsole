@@ -2,9 +2,12 @@
 #include "Fire.hpp"
 #include "SquareObject.hpp"
 #include "Player.hpp"
-#include "color_def.h"
 
+#include "curses_conf.h"
+#ifndef NO_CURSES
 #include <ncurses.h>
+#endif
+
 #include <time.h>
 
 Bomb::Bomb(Player *creator_, int x_, int y_, int power_) :
@@ -35,11 +38,13 @@ SquareObject::req_delete_t Bomb::run(){
 }
 
 void Bomb::drawAA(){
+    #ifndef NO_CURSES
     attron(COLOR_PAIR(BOMB_COLOR));
     mvprintw(y, x*MAP_SQ_SIZE_X, "爆");
     attron(COLOR_PAIR(BOMB_FUSE_COLOR) | A_BLINK);
     mvprintw(y, x*MAP_SQ_SIZE_X+2, "*");
     attroff(COLOR_PAIR(BOMB_FUSE_COLOR) | A_BLINK);
+    #endif
 }
 
 void Bomb::explosion(){

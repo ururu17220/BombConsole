@@ -1,7 +1,10 @@
 #include "Fire.hpp"
 #include "SquareObject.hpp"
+
+#include "curses_conf.h"
+#ifndef NO_CURSES
 #include <ncurses.h>
-#include "color_def.h"
+#endif 
 
 Fire::Fire(Player *creator_, int x_, int y_, int left_fire_x_, int right_fire_x_, int down_fire_y_, int up_fire_y_) :
     SquareObject(x_, y_),
@@ -30,6 +33,7 @@ SquareObject::req_delete_t Fire::run(){
 }
 
 void Fire::drawAA(){
+    #ifndef NO_CURSES
     int r;
     attron(COLOR_PAIR(FIRE_COLOR));
     for(r = left_fire_x; r <= right_fire_x; r++)
@@ -43,4 +47,5 @@ void Fire::drawAA(){
         else
             creator->kills++;
     attroff(COLOR_PAIR(FIRE_COLOR)); 
+    #endif
 }
