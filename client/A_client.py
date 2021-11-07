@@ -1,6 +1,7 @@
 import socket   # ソケット通信のため
 import curses   # 画面描画、キー入力のため
 import getpass  # ユーザー名取得のため
+import math     # 受信データサイズの計算のため
 
 # サーバーのIPアドレス
 SERVER_IP = "192.168.0.12" 
@@ -8,7 +9,7 @@ SERVER_IP = "192.168.0.12"
 PORT = 8000 
 
 
-#   task1 スタート時の処理 -----------------------------------------
+#   スタート時の処理 -----------------------------------------
 
 # ログインしているユーザー名を取得する
 user_name = getpass.getuser()
@@ -35,7 +36,8 @@ y = receive_data[1]
 # 3番目がマップサイズ（x）、4番目がマップサイズ（y）
 MAP_SIZE_X = receive_data[2]
 MAP_SIZE_Y = receive_data[3]
-
+# マップサイズから受信に必要なデータサイズを計算
+RCV_SIZE = 2**math.ceil(math.log2(MAP_SIZE_X*MAP_SIZE_Y+1))
 # --------------------------------------------------------
 
 
@@ -46,7 +48,7 @@ map_data2 = [[0 for i in range(MAP_SIZE_X)] for j in range(MAP_SIZE_Y)]
 stdscr = curses.initscr()
 curses.noecho()
 curses.cbreak()
-curses.halfdelay(1)
+stdscr.timeout(10)
 curses.start_color()
 curses.curs_set(0)
 stdscr.keypad(True)
@@ -61,14 +63,15 @@ curses.init_pair(5,curses.COLOR_MAGENTA,curses.COLOR_YELLOW)
 
 # 受信とマップの表示ループ
 while True:
-
-    #   task3   キー入力による自キャラの操作とデータ送信処理#
+    #  キー入力による自キャラの操作とデータ送信処理#
     nx=x
     ny=y
 	#ボムの有無
     bomb = 0
+
     #キー入力
     c=stdscr.getch()
+    curses.flushinp()   # 押しっぱなし対策
 
     if  c == curses.KEY_UP: 
         ny = y-1
@@ -99,12 +102,12 @@ while True:
         data=x.to_bytes(1,"little", signed=False)+y.to_bytes(1,"little", signed=False)+bomb.to_bytes(1, "little", signed=False) #送信用データ生成
         s.send(data) #データ送信
 
+    
     #  -------------------------------------------------------------------
     
 
-    #   task2   マップデータの受信と表示処理    #
-    # 2048byteまで受信
-    receive_data = s.recv(2048)
+    #  マップデータの受信と表示処理    #
+    receive_data = s.recv(RCV_SIZE)
     
     # 受信データからキャラの状態（生死）のデータを取り出す
     state = receive_data[0]
@@ -117,7 +120,7 @@ while True:
     map_data = receive_data[1:]
     
     # バッファクリア
-    stdscr.clear()
+    stdscr.erase()
 
     # マップデータを全走査して表示
     for j in range(MAP_SIZE_Y):
@@ -184,7 +187,7 @@ curses.echo()
 curses.endwin()
 
 
-#   task1  エンド時の処理 -----------------------------------------
+#  エンド時の処理 -----------------------------------------
 
 # サーバーからデータを受信　データサイズは適当に2048byte
 receive_data = s.recv(2048)
@@ -193,6 +196,7 @@ receive_data = s.recv(2048)
 ranking = receive_data.decode("utf-8")
 
 # ランキングを表示する
+print("RANKING")
 print(ranking)
 
 # --------------------------------------------------------
