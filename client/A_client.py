@@ -2,11 +2,17 @@ import socket   # ソケット通信のため
 import curses   # 画面描画、キー入力のため
 import getpass  # ユーザー名取得のため
 import math     # 受信データサイズの計算のため
+import sys      # 引数を使うため
 
 # サーバーのIPアドレス
-SERVER_IP = "192.168.0.9" 
+if len(sys.argv) == 1:
+    SERVER_IP = socket.gethostbyname(socket.gethostname())
+else:
+    SERVER_IP = sys.argv[1]
+#SERVER_IP = "192.168.0.9" 
+
 # ポート番号
-PORT = 8000 
+PORT = 10001 
 
 
 #   スタート時の処理 -----------------------------------------

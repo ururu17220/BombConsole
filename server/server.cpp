@@ -48,7 +48,7 @@ int getch(void){
 
 #endif
 
-#define PORT    8000
+#define PORT    10001
 
 std::mutex mtx;
 
