@@ -23,7 +23,12 @@ Client::~Client(){
 }
 
 int Client::send(const uint8_t *send_data, int len){
-    return write(ss, send_data, len);
+    int error = 0;
+    socklen_t sock_len = sizeof (error);
+    int retval = getsockopt (ss, SOL_SOCKET, SO_ERROR, &error, &sock_len);
+    if(retval == 0)
+        return write(ss, send_data, len);
+    return -1;
 }
 
 void Client::task(){
