@@ -47,13 +47,15 @@ class Server{
     // Destructor
     ~Server();
 
-    void (*onConnect)(Client *c);
+    bool (*onConnect)(Client *c);
     void (*onReceive)(Client *c, uint8_t *receive_data, int len);
 
     Client* waitClients();
 
 
     void broadcast(const uint8_t *send_data, int len);
+
+    void closeClient(Client *c);
 
     std::unordered_map<int, Client*> clients;
 

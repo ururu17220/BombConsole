@@ -78,7 +78,10 @@ Client* Server::waitClients(){
     }
 
     Client *c = new Client(ss, &onReceive);
-    onConnect(c);
+    if(!onConnect(c)){
+        delete c;
+        return nullptr;
+    }
     clients[ss] = c;
     return c;
 }
@@ -89,6 +92,11 @@ Server::~Server(){
         delete c;
     }
     close(s);
+}
+
+void Server::closeClient(Client *c){
+    clients.erase(c->getSocket());
+    delete c;
 }
 
 void Server::broadcast(const uint8_t *send_data, int len){

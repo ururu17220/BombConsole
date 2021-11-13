@@ -27,7 +27,8 @@ void printw(const char *format, Args const & ... args){
 }
 
 int getch(void){
-    usleep(100000);
+    std::this_thread::sleep_for(std::chrono::microseconds(100000));
+    //usleep(100000);
     struct termios oldt, newt;
     int ch;
     int oldf;
@@ -90,20 +91,29 @@ int main(void){
     #endif 
 
     // Server initialize
+    mtx.lock();
     Server server(PORT);    
 
     server.onConnect = [](Client *c){
+        mtx.lock();
+        //printw("connected id=%d\n", c->getSocket());
         new Player(c->getSocket());
+        mtx.unlock();
+        return true;
     };
 
     server.onReceive = [](Client *c, uint8_t *receive_data, int len){
+        mtx.lock();
+        printw("name =");
         Player *p = Player::find(c->getSocket());
         strcpy(p->name, (const char *)receive_data); 
-        printw("%s\n", receive_data);
+        printw(" %s\n", receive_data);
+        mtx.unlock();
     };
+    mtx.unlock();
 
     // wait clients
-    printw("waiting players...\n");
+    printw("waiting for the players...\n");
     printw("Press 'g' : Game Start ,  Press 'q' : Force End\n\n");
     bool waitend = false;
     std::thread waitingPlayers([&waitend, &server](){
@@ -116,11 +126,11 @@ int main(void){
         if(key == 'g' && server.clients.size() > 1)
             break;
         else if(key == 'q'){
-            waitingPlayers.detach();
             return 0;
         }
 
     }
+    waitingPlayers.detach();
     waitend = true;
 
 
@@ -153,7 +163,8 @@ int main(void){
     printw("\nGame Start!\n");
     mtx.lock();
     server.onConnect = [](Client *c){
-        // ignore
+        // reject
+        return false;
     };
     server.onReceive = [](Client *c, uint8_t *receive_data, int len){
         Player *p = Player::find(c->getSocket());
@@ -207,9 +218,9 @@ int main(void){
 
     // send ranking
     std::string ranking;
-    for(int rank = 0; rank < Player::death.size(); rank++){
-        Player *p = Player::death[rank];
-        ranking += std::to_string(rank+1);
+    for(int rank = 1; rank <= Player::death.size(); rank++){
+        Player *p = Player::death[Player::death.size() - rank];
+        ranking += std::to_string(rank);
         ranking += "位 : ";
         ranking += p->name;
         ranking += '\n';
@@ -217,7 +228,7 @@ int main(void){
 
     server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
 
-    waitingPlayers.detach();
+    //waitingPlayers.detach();
 
     #ifndef NO_CURSES
     endwin();
