@@ -142,7 +142,7 @@ int main(void){
 
 
     // make map
-    int map_size = ceil((double)server.clients.size()/4.0)*4 + 3;
+    int map_size = 4*ceil(sqrt(server.clients.size()))-1;
     SquareObject::setMapSize(map_size, map_size);
     make_map();
 
