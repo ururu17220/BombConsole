@@ -62,6 +62,8 @@ std::unordered_map<int, Player*> Player::id_Player;
 std::vector<Player*> Player::death;
 std::unordered_set<Player*> Player::living;
 
+std::vector<uint8_t> send_data;   // Map data and Player's death or living
+
 void make_map(){
     int i,j;
     int map_size_x, map_size_y;
@@ -126,6 +128,11 @@ int main(void){
         if(key == 'g' && server.clients.size() > 1)
             break;
         else if(key == 'q'){
+            waitingPlayers.detach();
+
+            #ifndef NO_CURSES
+            endwin();
+            #endif 
             return 0;
         }
 
@@ -167,18 +174,30 @@ int main(void){
         return false;
     };
     server.onReceive = [](Client *c, uint8_t *receive_data, int len){
+        int x, y;
         Player *p = Player::find(c->getSocket());
-        int x = receive_data[0];
-        int y = receive_data[1];
+        int map_size_x, map_size_y;
+        SquareObject::getMapSize(&map_size_x, &map_size_y);
+        // make data
+        std::vector<uint8_t> send_data_(send_data);
+        send_data_[0] = p->getState();
+        // modify (remove PLAYER_ATTR)
+        p->getXY(&x, &y);
+        send_data_[1 + map_size_y*y + x] &= ~PLAYER_ATTR;
+        c->send(send_data_.data(), send_data_.size());
+
+        x = receive_data[0];
+        y = receive_data[1];
         int bomb = receive_data[2];
         p->moveTo(x, y);
         if(bomb)
             p->createBomb();
+
     };
     mtx.unlock();
 
 
-    std::vector<uint8_t> send_data(map_size * map_size + 1);   // Map data and Player's death or living
+    send_data = std::vector<uint8_t>(map_size * map_size + 1);
 
     // game loop
     while(Player::living.size() > 1){
@@ -192,13 +211,6 @@ int main(void){
         SquareObject::runAllObjects(send_data_itr);
         mtx.unlock();
 
-        // send data 
-        for(auto itr = server.clients.begin(); itr != server.clients.end(); itr++){ 
-            Client *c = itr->second;
-            Player *p = Player::find(c->getSocket());
-            send_data[0] = p->getState();
-            c->send(send_data.data(), send_data.size());
-        }
         #ifndef NO_CURSES
         refresh();
         #endif
@@ -207,13 +219,21 @@ int main(void){
     }
 
     // game end
+    mtx.lock();
+    server.onReceive = [](Client *c, uint8_t *receive_data, int len){
+        // ignore
+    };
+    mtx.unlock();
     printw("Game End!\n\n");
     sleep(1);
     uint8_t game_end_command = (uint8_t)'\n';
     server.broadcast(&game_end_command, 1);
 
-    if(Player::living.size() == 1)
-        Player::death.push_back(*Player::living.begin());
+    while(Player::living.size()){
+        auto itr = Player::living.begin();
+        Player::death.push_back(*itr);
+        Player::living.erase(itr);
+    }
 
 
     // send ranking
@@ -227,8 +247,6 @@ int main(void){
     }
 
     server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
-
-    //waitingPlayers.detach();
 
     #ifndef NO_CURSES
     endwin();

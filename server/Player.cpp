@@ -20,7 +20,14 @@ Player* Player::find(int id_){
     return id_Player[id_];
 }
 
+void Player::getXY(int *x_, int *y_){
+    *x_ = xp;
+    *y_ = yp;
+}
+
 SquareObject::req_delete_t Player::run(){
+    xp = x;
+    yp = y;
     uint8_t map_attr = getSquareMapAttr(x, y);
     switch (state){
     case StateIs::Living:       

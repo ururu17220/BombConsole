@@ -4,39 +4,27 @@ import getpass  # ユーザー名取得のため
 import math     # 受信データサイズの計算のため
 
 # サーバーのIPアドレス
-SERVER_IP = "192.168.0.12" 
+SERVER_IP = "192.168.0.9" 
 # ポート番号
 PORT = 8000 
 
 
 #   スタート時の処理 -----------------------------------------
-
-# ログインしているユーザー名を取得する
 user_name = getpass.getuser()
-
-# ソケット通信で送るために、bytes型に変換する
 user_name_bytes = user_name.encode("utf-8")
 
-# ソケットを作成する
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# サーバーに接続する
 s.connect((SERVER_IP, PORT))
-
-# 自分の名前（ログインしているユーザー名）を送信する
 s.send(user_name_bytes)
 
-# サーバーからデータ(4byte)を受信
 receive_data = s.recv(4)
 
-# 受信データの配列から初期位置をとりだす
-# 1番目がx座標、2番目がy座標
 x = receive_data[0]
 y = receive_data[1]
-# 3番目がマップサイズ（x）、4番目がマップサイズ（y）
+
 MAP_SIZE_X = receive_data[2]
 MAP_SIZE_Y = receive_data[3]
-# マップサイズから受信に必要なデータサイズを計算
+
 RCV_SIZE = 2**math.ceil(math.log2(MAP_SIZE_X*MAP_SIZE_Y+1))
 # --------------------------------------------------------
 
@@ -44,7 +32,7 @@ RCV_SIZE = 2**math.ceil(math.log2(MAP_SIZE_X*MAP_SIZE_Y+1))
 # マップデータの2次元配列(MAP_SIZE_X * MAP_SIZE_Y)の作成
 map_data2 = [[0 for i in range(MAP_SIZE_X)] for j in range(MAP_SIZE_Y)]
 
-# cursesの初期化処理（おまじない）task2
+# cursesの初期化処理（おまじない)
 stdscr = curses.initscr()
 curses.noecho()
 curses.cbreak()
@@ -89,7 +77,9 @@ while True:
         bomb = 1
 
     elif (c == ord('q')):
-        break
+        curses.endwin()
+        s.close()
+        exit()
 
     #if	(map_data2[ny][nx] != 0x20):
     if	(map_data2[ny][nx] & 0x30 == 0):
@@ -97,10 +87,8 @@ while True:
         y=ny
 
     
-    # 何も入力されていないときはデータを送信しない
-    if(c != curses.ERR):
-        data=x.to_bytes(1,"little", signed=False)+y.to_bytes(1,"little", signed=False)+bomb.to_bytes(1, "little", signed=False) #送信用データ生成
-        s.send(data) #データ送信
+    data=x.to_bytes(1,"little", signed=False)+y.to_bytes(1,"little", signed=False)+bomb.to_bytes(1, "little", signed=False) #送信用データ生成
+    s.send(data) #データ送信
 
     
     #  -------------------------------------------------------------------
@@ -188,15 +176,10 @@ curses.endwin()
 
 
 #  エンド時の処理 -----------------------------------------
-
-# サーバーからデータを受信　データサイズは適当に2048byte
 receive_data = s.recv(2048)
 
-# 受信データをstr型に変換する
 ranking = receive_data.decode("utf-8")
 
-# ランキングを表示する
-print("RANKING")
 print(ranking)
 
 # --------------------------------------------------------
