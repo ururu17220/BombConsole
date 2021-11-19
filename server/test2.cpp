@@ -103,7 +103,7 @@ int main(void){
             Client *c = itr->second;
             Player *p = Player::find(c->getSocket());
             send_data[0] = p->getState();
-            c->send(send_data.data(), (int)send_data.size());
+            c->Send(send_data.data(), (int)send_data.size());
         }
 
         mtx.unlock();

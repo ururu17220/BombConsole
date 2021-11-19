@@ -9,7 +9,7 @@ int main(void){
     };
     server.onReceive = [](Client *c, uint8_t *receive_data, int len){
         printf("from %d len=%d %s", c->getSocket(), len, receive_data);
-        c->send(receive_data, len);
+        c->Send(receive_data, len);
     };
     printf("Server Initialized\n");
     int i = 0;

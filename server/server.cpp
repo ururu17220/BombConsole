@@ -157,7 +157,7 @@ int main(void){
         send_data_coordinate[0] = x_init;
         send_data_coordinate[1] = y_init;
         Player::find(itr->second->getSocket())->moveTo(x_init, y_init);
-        itr->second->send(send_data_coordinate, sizeof(send_data_coordinate)/sizeof(send_data_coordinate[0]));
+        itr->second->Send(send_data_coordinate, sizeof(send_data_coordinate)/sizeof(send_data_coordinate[0]));
         x_init += 4;
         if(x_init >= map_size){
             x_init = 1;
@@ -184,7 +184,7 @@ int main(void){
         // modify (remove PLAYER_ATTR)
         p->getXY(&x, &y);
         send_data_[1 + map_size_y*y + x] &= ~PLAYER_ATTR;
-        c->send(send_data_.data(), send_data_.size());
+        c->Send(send_data_.data(), send_data_.size());
 
         x = receive_data[0];
         y = receive_data[1];
@@ -218,16 +218,15 @@ int main(void){
         if(key=='q')break;  // Force end
     }
 
-    // game end
+    sleep(1);
     mtx.lock();
     server.onReceive = [](Client *c, uint8_t *receive_data, int len){
-        // ignore
+        const uint8_t game_end_command = (uint8_t)'\n';
+        c->Send(&game_end_command, 1);
     };
     mtx.unlock();
     printw("Game End!\n\n");
-    sleep(1);
-    uint8_t game_end_command = (uint8_t)'\n';
-    server.broadcast(&game_end_command, 1);
+    sleep(2);
 
     while(Player::living.size()){
         auto itr = Player::living.begin();
@@ -246,12 +245,13 @@ int main(void){
         ranking += '\n';
     }
 
-    server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
-
     #ifndef NO_CURSES
     endwin();
     #endif 
 
+    mtx.lock();
+    server.broadcast((const uint8_t *)ranking.c_str(), ranking.length());
+    mtx.unlock();
     printf("RANKING\n%s\n", ranking.c_str());
 
     return 0;

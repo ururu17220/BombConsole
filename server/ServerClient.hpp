@@ -16,7 +16,7 @@ class Client{
     // Destructor
     ~Client();
 
-    int send(const uint8_t *send_data, int len);
+    int Send(const uint8_t *send_data, int len);
     void (**onReceive)(Client *c, uint8_t *receive_data, int len);
 
     int getSocket();

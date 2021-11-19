@@ -106,7 +106,7 @@ int main(void){
             x_init = 1;
             y_init += 4;
         }
-        itr->second->send(send_data, sizeof(send_data)/sizeof(send_data[0]));
+        itr->second->Send(send_data, sizeof(send_data)/sizeof(send_data[0]));
         Player::death.push_back(Player::find(itr->second->getSocket()));    //for test
     }
 

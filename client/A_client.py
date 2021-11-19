@@ -185,7 +185,7 @@ curses.endwin()
 receive_data = s.recv(2048)
 
 ranking = receive_data.decode("utf-8")
-
+print("RANKING")
 print(ranking)
 
 # --------------------------------------------------------

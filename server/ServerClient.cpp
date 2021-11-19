@@ -22,12 +22,12 @@ Client::~Client(){
     close(ss);
 }
 
-int Client::send(const uint8_t *send_data, int len){
+int Client::Send(const uint8_t *send_data, int len){
     int error = 0;
     socklen_t sock_len = sizeof (error);
     int retval = getsockopt (ss, SOL_SOCKET, SO_ERROR, &error, &sock_len);
     if(retval == 0)
-        return write(ss, send_data, len);
+        return send(ss, (const void*)send_data, (size_t)len, MSG_NOSIGNAL);
     return -1;
 }
 
@@ -65,7 +65,7 @@ Server::Server(uint16_t port){
         perror("ERROR on bind");
         exit(1);
     }
-    listen(s, 5);
+    listen(s, 64);
 }
 
 Client* Server::waitClients(){
@@ -107,6 +107,6 @@ void Server::closeClient(Client *c){
 void Server::broadcast(const uint8_t *send_data, int len){
     for(auto itr = clients.begin(); itr != clients.end(); itr++){
         Client *c = itr->second;
-        c->send(send_data, len);
+        c->Send(send_data, len);
     }
 }
